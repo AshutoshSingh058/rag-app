@@ -23,7 +23,17 @@ inngest_client = inngest.Inngest(
 
 @inngest_client.create_function(
     fn_id = "RAG: Ingest PDF",
-    trigger= inngest.TriggerEvent(event="rag/ingest_pdf")
+    trigger= inngest.TriggerEvent(event="rag/ingest_pdf"),
+    throttle=inngest.Throttle(
+        limit=10,
+        count=2, 
+        period = datetime.timedelta(minutes=1)
+    ),
+    rate_limit=inngest.RateLimit(
+        limit=1,
+        period=datetime.timedelta(hours=4),
+        keys="event.data.source_id",
+    )
 )
 
 async def rag_ingest_pdf(ctx: inngest.Context):
@@ -77,7 +87,7 @@ async def rag_query_pdf_ai(ctx: inngest.Context):
 
     adapter = gemini.Adapter(
         auth_key=os.getenv("GEMINI_API_KEY"),
-        model="gemini-2.0-flash"
+        model="gemini-3.6-flash"
     )
 
     res = await ctx.step.ai.infer(

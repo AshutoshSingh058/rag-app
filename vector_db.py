@@ -16,13 +16,13 @@ class QdrantStorage:
         points = [PointStruct(id=ids[i], vector = vectors[i], payload=payloads[i])for i in range(len(ids))]
         self.client.upsert(self.collection, points=points)
     
-    def search(self, querry_vector, top_k: int = 5):
-        results = self.client.search(
+    def search(self, query_vector, top_k: int = 5):
+        results = self.client.query_points(
             collection_name= self.collection,
-            querry_vector=querry_vector,
+            query=query_vector,
             with_payload= True,
             limit=top_k
-        )
+        ).points
         contexts = []
         sources = set()
 
